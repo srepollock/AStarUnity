@@ -8,7 +8,7 @@ using System;
 public class MapController : MonoBehaviour {
 	public string _mapFileName;
 	public char[,] _map;
-	public NodeRecord[,] _nodeRecords;
+	public Node[,] _nodes;
 	public GameObject _wall, _ground, _start, _goal;
 
 	// Use this for initialization
@@ -22,16 +22,20 @@ public class MapController : MonoBehaviour {
 			resetMap();
 		}
 	}
-
-	public NodeRecord[,] readMap (string fileName) {
+	/// <summary>
+	/// Reades the map passed in and creates the objects.
+	/// </summary>
+	/// <param name="fileName">Filename to get the map from.</param>
+	/// <returns>A node double array that is the map in node objects.</returns>
+	public Node[,] readMap (string fileName) {
 		int width = getWidth(), height = getHeight();
 		_map = new char[width,height];
-		NodeRecord[,] records = new NodeRecord[width,height];
+		Node[,] records = new Node[width,height];
 		int col=0, row=0;
 		string line;
 		// s=start,g=goal,x=wall,' '=blank
 		string path = "Assets/Assets/";
-        StreamReader reader = new StreamReader(path+fileName); 
+        StreamReader reader = new StreamReader(fileName); 
 		GameObject child;
         while (!reader.EndOfStream) {
 			line = reader.ReadLine();
@@ -44,8 +48,6 @@ public class MapController : MonoBehaviour {
 					child.transform.parent = this.transform;
 					child.AddComponent<Node>();
 					child.GetComponent<Node>().setNode(col, row, "wall");
-					child.AddComponent<NodeRecord>();
-					child.GetComponent<NodeRecord>().node = child.GetComponent<Node>();
 				}
 				else if (ch == 's' || ch == 'S') {
 					child = GameObject.Instantiate(_start, new Vector3(col, 0, row), new Quaternion());
@@ -53,8 +55,6 @@ public class MapController : MonoBehaviour {
 					child.transform.parent = this.transform;
 					child.AddComponent<Node>();
 					child.GetComponent<Node>().setNode(col, row, "start");
-					child.AddComponent<NodeRecord>();
-					child.GetComponent<NodeRecord>().node = child.GetComponent<Node>();
 				}
 				else if (ch == 'g' || ch == 'G') {
 					child = GameObject.Instantiate(_goal, new Vector3(col, 0, row), new Quaternion());
@@ -62,8 +62,6 @@ public class MapController : MonoBehaviour {
 					child.transform.parent = this.transform;
 					child.AddComponent<Node>();
 					child.GetComponent<Node>().setNode(col, row, "goal");
-					child.AddComponent<NodeRecord>();
-					child.GetComponent<NodeRecord>().node = child.GetComponent<Node>();
 				}
 				else {
 					child = GameObject.Instantiate(_ground, new Vector3(col, 0, row), new Quaternion());
@@ -71,11 +69,8 @@ public class MapController : MonoBehaviour {
 					child.transform.parent = this.transform;
 					child.AddComponent<Node>();
 					child.GetComponent<Node>().setNode(col, row, "ground");
-					child.AddComponent<NodeRecord>();
-					child.GetComponent<NodeRecord>().node = child.GetComponent<Node>();
 				}
-				records[col,row] = child.GetComponent<NodeRecord>();
-				// Debug.Log("" + col + ", " + row + ": " + ch.ToString());
+				records[col,row] = child.GetComponent<Node>();
 				_map[col,row] = ch;
 				col++;
 			}
@@ -84,29 +79,38 @@ public class MapController : MonoBehaviour {
         reader.Close();
 		return records;
 	}
-
+	/// <summary>
+	/// Resets the map and researches
+	/// </summary>
 	public void resetMap() {
 		cleanUp();
 		GameObject aStarObj = GameObject.FindWithTag("AStar");
 		AStarSearch aStar = aStarObj.GetComponent<AStarSearch>();
-		this._nodeRecords = readMap(_mapFileName);
+		this._nodes = readMap(_mapFileName);
 		aStar._map = _map;
-		aStar.findPath(this._nodeRecords);
+		aStar.findPath(this._nodes);
 	}
-
+	/// <summary>
+	/// Cleans the current map
+	/// </summary>
 	public void cleanUp() {
 		foreach (Transform child in this.transform) {
 			GameObject.Destroy(child.gameObject);
 		}
 	}
-
+	/// <summary>
+	/// UI button funciton
+	/// </summary>
     public void Apply() {
 		String path = EditorUtility.OpenFilePanel("Open a map .txt file", "", "txt");
 		String[] array = path.Split('/');
 		_mapFileName = array[array.Length-1];
 		resetMap();
     }
-
+	/// <summary>
+	/// Gets the width of the maze
+	/// </summary>
+	/// <returns>Width</returns>
 	public int getWidth() {
 		string line;
 		int x = 0;
@@ -128,7 +132,10 @@ public class MapController : MonoBehaviour {
 			return -1;
 		}
 	}
-
+	/// <summary>
+	/// Gets the height of the maze
+	/// </summary>
+	/// <returns>Height</returns>
 	public int getHeight() {
 		string line;
 		int x = 0;

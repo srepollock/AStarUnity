@@ -12,11 +12,11 @@ public class Heuristic {
 		float ey = Mathf.Abs(_currentNode.y - goalNode.y);
 		return (int)(_travelCost * (ex + ey));
 	}
-	public int estimate(float _travelCost, NodeRecord _currentNode) {
-		float ex = Mathf.Abs(_currentNode.node.x - goalNode.x);
-		float ey = Mathf.Abs(_currentNode.node.y - goalNode.y);
-		return (int)(_travelCost * (ex + ey));
-	}
+	// public int estimate(float _travelCost, NodeRecord _currentNode) {
+	// 	float ex = Mathf.Abs(_currentNode.node.x - goalNode.x);
+	// 	float ey = Mathf.Abs(_currentNode.node.y - goalNode.y);
+	// 	return (int)(_travelCost * (ex + ey));
+	// }
 
 	void Start() {}
 
