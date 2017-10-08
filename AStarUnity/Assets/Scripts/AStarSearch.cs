@@ -26,7 +26,6 @@ public class AStarSearch : MonoBehaviour {
 	}
 
 	public void buildConnections() {
-		Debug.Log("Size: " + _map.GetLength(0) + ", " + _map.GetLength(1));
 		for (int col = 0;col<_map.GetLength(0);col++) {
 			for(int row = 0;row<_map.GetLength(1);row++) {
 				if (!(col-1 <= 0)) {
@@ -41,7 +40,6 @@ public class AStarSearch : MonoBehaviour {
 				if (!(row+1 >= _map.GetLength(1))) {
 					this._nodeRecords[col, row].connections.Add(new Connection().setConnection(1, this._nodeRecords[col, row], _nodeRecords[col, row+1]));
 				}
-				Debug.Log(this._nodeRecords[col,row].node.type + " connections: " + this._nodeRecords[col,row].connections.ToString());
 			}
 		}
 	}
@@ -101,49 +99,54 @@ public class AStarSearch : MonoBehaviour {
 			List<Connection> connections = current.getConnections();
 			float endNodeHeuristic;
 			foreach (Connection c in connections) {
-				NodeRecord endNode = c.toNode;
-				if (endNode.node.type == "wall") continue;
+				// NodeRecord endNode = c.toNode;
+				if (c.toNode.node.type == "wall") continue;
 				NodeRecord endNodeRecord;
 				c.cost = 1;
 				float endNodeCost = current.costSoFar + c.cost;
-				if (closed.Contains(endNode)) {
-					endNodeRecord = closed.Find(_endNode => _endNode.node == endNode.node);
+				if (closed.Contains(c.toNode)) {
+					endNodeRecord = closed.Find(_endNode => _endNode.node == c.toNode.node);
 					if (endNodeRecord.costSoFar <= endNodeCost) {
 						continue;
 					}
 					closed.Remove(endNodeRecord);
 					endNodeHeuristic = endNodeRecord.cost - endNodeRecord.costSoFar;
-				} else if (open.Contains(endNode)) {
-					endNodeRecord = open.Find(_endNode => _endNode.node == endNode.node);
+				} else if (open.Contains(c.toNode)) {
+					endNodeRecord = open.Find(_endNode => _endNode.node == c.toNode.node);
 					if (endNodeRecord.costSoFar <= endNodeCost) {
 						continue;
 					}
 					endNodeHeuristic = endNodeRecord.cost - endNodeRecord.costSoFar;
 				} else {
 					endNodeRecord = new NodeRecord();
-					endNodeRecord.node = endNode.node;
-					endNodeHeuristic = heuristic.estimate(1, endNode.node);
+					endNodeRecord.node = c.toNode.node;
+					endNodeHeuristic = heuristic.estimate(1, c.toNode.node);
 				}
 				// NodeRecord endNodeRecord = new NodeRecord();
 				endNodeRecord.cost = endNodeCost;
-				endNodeRecord.parentNode = endNode; // TODO: Parent node?
+				endNodeRecord.parentNode = c.toNode;
 				endNodeRecord.estimatedTotalCost = endNodeCost + endNodeHeuristic;
-				if (!open.Contains(endNode)) {
-					open.Add(endNode);
+				if (!open.Contains(c.toNode)) {
+					open.Add(c.toNode);
 				}
 			}
 			open.Remove(current);
 			closed.Add(current);
+			// sort for smallest
+			open.Sort();
 		}
 		if (current.node.type != "goal") {
 			return null; // TODO: Handle this
 		} else {
 			path = new List<NodeRecord>();
+			int count = 0;
 			while(current.node.type != "start") {
 				path.Add(current);
 				GameObject.Instantiate(pathObject, new Vector3(current.node.x, 0, current.node.y), new Quaternion());
-				if (current.connections == null) break;
-				current = current.connections.First().toNode; // Here is where it breaks (infinite)
+				if (current.parentNode == null) break;
+				current = current.parentNode; // Here is where it breaks (infinite)
+				if (count > 100) return null;
+				else count++;
 			}
 			path.Reverse();
 		}

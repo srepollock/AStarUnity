@@ -22,6 +22,18 @@ public class NodeRecord : MonoBehaviour {
 		return this.connections;
 	}
 
+	public NodeRecord CompareTo(NodeRecord compareNodeRecord) {
+		if (compareNodeRecord == null) {
+			return null;
+		} else {
+			if (this.node.fn > compareNodeRecord.node.fn) {
+				return compareNodeRecord;
+			} else {
+				return this;
+			}
+		}
+	}
+
 	// Use this for initialization
 	void Start () {
 		
