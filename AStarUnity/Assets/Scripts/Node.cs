@@ -88,6 +88,10 @@ public class Node : MonoBehaviour {
 		this.type = _type;
 	}
 
+	public Vector3 getPosition() {
+		return new Vector3(this.x, 0, this.y);
+	}
+
 
 	void Start() {
 		

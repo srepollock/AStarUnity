@@ -6,10 +6,10 @@ using System.IO;
 using System;
 
 public class MapController : MonoBehaviour {
-	public string _mapFileName;
+	string _mapFileName;
 	public char[,] _map;
 	public Node[,] _nodes;
-	public GameObject _wall, _ground, _start, _goal;
+	public GameObject _wall, _ground, _start, _goal, playerObject;
 
 	// Use this for initialization
 	void Start () {
@@ -18,9 +18,7 @@ public class MapController : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-		if (Input.GetKeyDown(KeyCode.R)) {
-			resetMap();
-		}
+
 	}
 	/// <summary>
 	/// Reades the map passed in and creates the objects.
@@ -33,8 +31,6 @@ public class MapController : MonoBehaviour {
 		Node[,] records = new Node[width,height];
 		int col=0, row=0;
 		string line;
-		// s=start,g=goal,x=wall,' '=blank
-		string path = "Assets/Assets/";
         StreamReader reader = new StreamReader(fileName); 
 		GameObject child;
         while (!reader.EndOfStream) {
@@ -55,6 +51,17 @@ public class MapController : MonoBehaviour {
 					child.transform.parent = this.transform;
 					child.AddComponent<Node>();
 					child.GetComponent<Node>().setNode(col, row, "start");
+					if (GameObject.Find("Player") == null) {
+						GameObject player = GameObject.Instantiate(playerObject, new Vector3(col, 0, row), new Quaternion());
+						player.name = "Player";
+						player.transform.forward = new Vector3(0, 0, -1);
+						// TODO: PLayer speed
+						player.GetComponent<PlayerScript>().speed = 5;
+					} else {
+						GameObject player = GameObject.Find("Player");
+						player.transform.position = child.GetComponent<Node>().getPosition();
+						player.transform.forward = new Vector3(0, 0, -1);
+					}
 				}
 				else if (ch == 'g' || ch == 'G') {
 					child = GameObject.Instantiate(_goal, new Vector3(col, 0, row), new Quaternion());
@@ -86,14 +93,18 @@ public class MapController : MonoBehaviour {
 		cleanUp();
 		GameObject aStarObj = GameObject.FindWithTag("AStar");
 		AStarSearch aStar = aStarObj.GetComponent<AStarSearch>();
+		aStar.cleanUp();
 		this._nodes = readMap(_mapFileName);
 		aStar._map = _map;
 		aStar.findPath(this._nodes);
+		// TODO: Something is breaking. Cannot set the _path stupidly! SHIIIIT
 	}
 	/// <summary>
-	/// Cleans the current map
+	/// Cleans the current map TODO: cleans the lists
 	/// </summary>
 	public void cleanUp() {
+		_map = null;
+		_nodes = null;
 		foreach (Transform child in this.transform) {
 			GameObject.Destroy(child.gameObject);
 		}
