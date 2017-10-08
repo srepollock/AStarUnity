@@ -1,12 +1,11 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEditor;
 using System.IO;
 using System;
 
 public class MapController : MonoBehaviour {
-	string _mapFileName;
+	string _mapFileName = "map.txt";
 	public char[,] _map;
 	public Node[,] _nodes;
 	public GameObject _wall, _ground, _start, _goal, playerObject;
@@ -113,9 +112,9 @@ public class MapController : MonoBehaviour {
 	/// UI button funciton
 	/// </summary>
     public void Apply() {
-		String path = EditorUtility.OpenFilePanel("Open a map .txt file", "", "txt");
-		String[] array = path.Split('/');
-		_mapFileName = array[array.Length-1];
+		// String path = EditorUtility.OpenFilePanel("Open a map .txt file", "", "txt");
+		// String[] array = path.Split('/');
+		// _mapFileName = array[array.Length-1];
 		resetMap();
     }
 	/// <summary>
