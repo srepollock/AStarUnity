@@ -167,6 +167,5 @@ public class MapController : MonoBehaviour {
 			Debug.Log(e);
 			return -1;
 		}
-		return x;
 	}
 }
